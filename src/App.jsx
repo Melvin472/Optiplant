@@ -171,9 +171,36 @@ const WeatherBackground = () => {
   const goToRecipes = () => { setView('recipes'); };
   const goHome = () => { setView('dashboard'); setSelectedBac(null); };
 
-  const handleAddRecipe = (newRecipe) => {
-    setGlobalRecipes([...globalRecipes, newRecipe]);
-    goHome();
+  const handleAddRecipe = async (newRecipe) => {
+    try {
+      // 1. On prépare les données pour matcher ta table SQL RECIPE
+      const payload = {
+        recipe_name: newRecipe.name,
+        water_quantity: parseInt(newRecipe.water), // On s'assure que c'est bien un INT
+        duration: 30 // Valeur par défaut (ex: 30 jours) en attendant qu'on ajoute ce champ au formulaire
+      };
+
+      // 2. On envoie les données à notre API Vercel
+      const response = await fetch('/api/save-recipe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        alert(`Recette enregistrée sur MySQL ! (ID de la recette : ${data.id_recipe})`);
+        
+        // Mise à jour de l'affichage local
+        setGlobalRecipes([...globalRecipes, newRecipe]);
+        goHome();
+      } else {
+        alert("Erreur serveur lors de l'enregistrement.");
+      }
+    } catch (error) {
+      console.error("Erreur réseau :", error);
+      alert("Impossible de contacter l'API.");
+    }
   };
 
   return (
