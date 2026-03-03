@@ -1,0 +1,295 @@
+/* =========================================
+   1. RESET & STRUCTURE GLOBALE
+   ========================================= */
+html, body {
+  margin: 0; padding: 0;
+  width: 100%; height: 100%;
+  font-family: 'Inter', sans-serif;
+  background-color: #000;
+  overflow-x: hidden;
+}
+
+#root { width: 100%; height: 100%; }
+
+.app-container {
+  position: center; width: 100%; min-height: 100vh;
+  display: center; justify-content: center; align-items: center;
+  overflow-y: auto;
+}
+
+
+/* =========================================
+   2. FOND VIDÉO YOUTUBE
+   ========================================= */
+.background-layer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 0;
+  pointer-events: none; /* Empêche de cliquer sur la vidéo YouTube */
+  overflow: hidden;
+}
+
+.background-layer iframe {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 115vw; /* On dépasse un peu pour cacher les bords YouTube */
+  height: 115vh;
+  transform: translate(-50%, -50%);
+  object-fit: cover;
+  /* Optionnel : ajoute un filtre pour que le texte reste lisible */
+  filter: brightness(0.6) blur(1px);
+}
+
+/* Les filtres d'ambiance s'appliquent directement sur la vidéo */
+.sunny.video-bg { filter: brightness(0.8) contrast(1.1) blur(1px); }
+.cloudy.video-bg { filter: brightness(0.6) grayscale(0.5) blur(2px); }
+.rainy.video-bg { filter: brightness(0.5) grayscale(0.7) blur(2px) sepia(0.2); }
+
+/* =========================================
+   3. INTERFACE
+   ========================================= */
+.interface-layer {
+  position: relative; z-index: 10;
+  width: 100%; max-width: 1600px;
+  padding: 30px; box-sizing: border-box;
+}
+
+.loading-screen { 
+  color: white; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh;
+}
+.loader-spinner { 
+  border: 4px solid rgba(255,255,255,0.1); border-top: 4px solid #3498db; 
+  border-radius: 50%; width: 50px; height: 50px; 
+  animation: spin 1s linear infinite; margin-bottom: 20px;
+}
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+/* =========================================
+   4. DASHBOARD & HEADER
+   ========================================= */
+.dashboard { width: 100%; display: flex; flex-direction: column; align-items: center; }
+
+.header-section {
+  width: 100%; display: flex; flex-direction: column; align-items: center; margin-bottom: 40px;
+}
+
+.main-title {
+  color: white; font-size: 3.5rem; margin-bottom: 10px;
+  text-shadow: 0 4px 15px rgba(0,0,0,0.7); text-align: center;
+}
+
+/* BOUTON RECETTE */
+.recipe-btn {
+  background: rgba(255, 255, 255, 0.15); border: 1px solid rgba(255, 255, 255, 0.4);
+  color: white; padding: 12px 30px; border-radius: 30px;
+  font-size: 1.1rem; font-weight: 600; cursor: pointer;
+  display: flex; align-items: center; gap: 10px;
+  backdrop-filter: blur(10px); transition: all 0.3s ease; margin-top: 10px;
+}
+.recipe-btn:hover { background: white; color: #000; transform: translateY(-3px); box-shadow: 0 5px 20px rgba(255,255,255,0.3); }
+
+/* GRID LAYOUT */
+.grid-layout {
+  display: grid; grid-template-columns: 1fr 1.2fr 1fr; 
+  gap: 40px; width: 100%; align-items: start;
+}
+.bac-column, .center-column { display: flex; flex-direction: column; gap: 30px; }
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+  border: 1px solid rgba(255, 255, 255, 0.3); border-radius: 25px; padding: 20px; color: white;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.3); transition: transform 0.2s ease;
+}
+
+/* =========================================
+   5. CUVE MÉTÉO
+   ========================================= */
+.weather-tank {
+  position: relative; overflow: hidden; padding: 0; min-height: 400px;
+  display: flex; flex-direction: column; justify-content: center;
+  border: 1px solid rgba(255, 255, 255, 0.3); border-radius: 30px;
+  cursor: pointer; background: rgba(0,0,0,0.2); transition: transform 0.3s;
+}
+.weather-tank:hover { transform: scale(1.02); border-color: #fff; box-shadow: 0 0 30px rgba(0, 210, 211, 0.5); }
+
+.tank-liquid {
+  position: absolute; bottom: 0; left: 0; width: 100%; z-index: 0;
+  background: linear-gradient(180deg, rgba(0, 210, 211, 0.8) 0%, rgba(46, 134, 222, 0.9) 100%);
+  transition: height 1.5s ease;
+}
+.wave { position: absolute; width: 200%; height: 200%; left: -50%; top: -140%; border-radius: 40%; animation: drift 10s infinite linear; }
+.wave1 { background: rgba(255,255,255,0.2); animation-duration: 8s; }
+.wave2 { background: rgba(255,255,255,0.1); animation-duration: 12s; top: -145%; }
+@keyframes drift { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+.tank-content {
+  position: relative; z-index: 5; padding: 35px; height: 100%;
+  display: flex; flex-direction: column; justify-content: space-between;
+  text-shadow: 0 2px 5px rgba(0,0,0,0.5); color: white;
+}
+.tank-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.3); padding-bottom: 15px; }
+.header-left { display: flex; align-items: center; gap: 10px; }
+.tank-header h2 { font-size: 1.4rem; margin: 0; }
+.main-temp-display { text-align: center; }
+.big-temp { font-size: 6.5rem; font-weight: 800; line-height: 1; }
+.weather-desc { font-size: 1.6rem; text-transform: capitalize; margin: 0; }
+.weather-pills { display: flex; justify-content: center; gap: 20px; }
+.pill {
+  background: rgba(255, 255, 255, 0.2); border: 1px solid rgba(255,255,255,0.4);
+  padding: 10px 20px; border-radius: 30px; font-size: 1rem;
+  backdrop-filter: blur(10px); display: flex; gap: 10px; align-items: center;
+}
+
+/* =========================================
+   6. BACS GÉANTS
+   ========================================= */
+.bac-card {
+  position: relative; display: flex; align-items: center; gap: 30px; padding: 35px; min-height: 180px; cursor: pointer;
+}
+.bac-card:hover { transform: translateY(-8px); background: rgba(255,255,255,0.2); }
+.bac-img-container img { 
+  width: 140px; height: 140px; border-radius: 20px; object-fit: cover; 
+  border: 3px solid rgba(255,255,255,0.3); box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+}
+.bac-info-large h3 { font-size: 1.6rem; margin: 0 0 10px 0; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bac-subtitle { font-size: 1.1rem; opacity: 0.9; }
+
+.status-badge-corner {
+  position: absolute; top: 15px; right: 15px; padding: 6px 15px; border-radius: 15px; 
+  font-size: 0.85rem; font-weight: bold; box-shadow: 0 2px 10px rgba(0,0,0,0.3); z-index: 10;
+}
+.bg-red { background: #ff4757; color: white; animation: pulse 2s infinite; border: 1px solid white; }
+.bg-green { background: #2ecc71; color: white; border: 1px solid white; }
+.border-red { border: 2px solid #ff4757; box-shadow: 0 0 20px rgba(255, 71, 87, 0.3); }
+.border-green { border: 2px solid #2ecc71; }
+@keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.8; } 100% { opacity: 1; } }
+
+/* =========================================
+   7. CARTE ÉQUIPE
+   ========================================= */
+.team-card { padding: 30px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; }
+.team-card:hover { background: rgba(255,255,255,0.25); border-color: #f1c40f; }
+.team-emoji { font-size: 2.5rem; margin-right: 20px; }
+.team-info h3 { font-size: 1.3rem; margin: 0; }
+.team-avatars .avatar { width: 45px; height: 45px; border-radius: 50%; background: #34495e; border: 2px solid white; display: flex; justify-content: center; align-items: center; font-size: 0.9rem; margin-left: -12px; }
+
+/* =========================================
+   8. DÉTAILS & RECETTES & CONFIGURATION
+   ========================================= */
+.details-container { width: 100%; max-width: 1000px; margin: auto; padding-bottom: 50px; }
+.details-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+.btn-back { background: rgba(255,255,255,0.15); border: 1px solid white; padding: 12px 30px; border-radius: 30px; cursor: pointer; font-weight: bold; margin-bottom: 20px; color: white; }
+.details-grid, .team-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.left-detail-col { display: flex; flex-direction: column; gap: 20px; }
+
+/* NOUVEAU: CONFIGURATION RECETTES */
+.recipe-config-card { display: flex; flex-direction: column; gap: 15px; padding: 25px; }
+.config-desc { opacity: 0.8; font-size: 0.9rem; margin-top: -10px; }
+.stage-selector { display: flex; flex-direction: column; gap: 5px; }
+.stage-selector label { font-weight: bold; color: #00d2d3; }
+.btn-save-config { background: #00d2d3; color: black; border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 10px; transition: 0.3s; }
+.btn-save-config:hover { background: white; }
+
+
+/* RECIPE FORM STYLES */
+.recipe-form-card { padding: 40px; display: flex; flex-direction: column; gap: 30px; }
+.form-title { text-align: center; font-size: 1.8rem; margin: 0; font-weight: 300; letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 20px; }
+.input-group label { display: block; margin-bottom: 10px; opacity: 0.8; font-size: 0.9rem; }
+
+.glass-input, .glass-select {
+  width: 100%; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.3);
+  padding: 12px; border-radius: 10px; color: white; font-size: 1rem; font-family: 'Inter', sans-serif; box-sizing: border-box;
+}
+.glass-select option { background: #333; }
+.glass-input:focus, .glass-select:focus { outline: none; border-color: #00d2d3; background: rgba(0,0,0,0.4); }
+
+.form-row-split { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; }
+.form-column h4 { font-size: 1.2rem; margin-bottom: 15px; color: #00d2d3; }
+
+.nutrient-adder { display: flex; gap: 10px; margin-bottom: 10px; }
+.custom-nutrient-input { margin-bottom: 15px; animation: slideDown 0.3s ease; }
+@keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+
+.percent-input-wrapper { position: relative; width: 80px; flex-shrink: 0; }
+.unit { position: absolute; right: 10px; top: 12px; opacity: 0.6; }
+
+.btn-add { background: transparent; border: 1px dashed rgba(255,255,255,0.5); color: white; padding: 8px; width: 100%; border-radius: 10px; cursor: pointer; transition: 0.2s; }
+.btn-add:hover { background: rgba(255,255,255,0.1); border-color: white; }
+
+.ingredients-list { margin-top: 15px; display: flex; flex-direction: column; gap: 8px; }
+.ingredient-tag { background: rgba(255,255,255,0.1); padding: 8px 12px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem; }
+.btn-remove { background: none; border: none; color: #ff4757; font-weight: bold; cursor: pointer; font-size: 1.2rem; }
+
+.center-content { display: flex; flex-direction: column; align-items: center; }
+.water-input-wrapper { position: relative; width: 100%; }
+.unit-large { position: absolute; right: 15px; top: 15px; font-size: 1.2rem; opacity: 0.6; }
+.large-text { font-size: 2rem; text-align: center; height: 70px; }
+.water-icon { font-size: 5rem; margin-top: 20px; opacity: 0.8; animation: bounce 2s infinite; }
+@keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+
+.btn-validate {
+  background: linear-gradient(90deg, #2ecc71, #27ae60); border: none; color: white; padding: 15px; border-radius: 15px;
+  font-size: 1.2rem; font-weight: bold; letter-spacing: 1px; cursor: pointer; margin-top: 20px; transition: transform 0.2s; box-shadow: 0 5px 15px rgba(46, 204, 113, 0.4);
+}
+.btn-validate:hover { transform: scale(1.02); }
+
+/* --- AUTRES ELEMENTS DETAILS --- */
+.plant-stage { margin-top: 20px; }
+.stage-info { display: flex; justify-content: space-between; margin-bottom: 10px; }
+.progress-bar-bg { width: 100%; height: 20px; background: rgba(255,255,255,0.2); border-radius: 10px; overflow: hidden; }
+.progress-bar-fill { height: 100%; background: linear-gradient(90deg, #badc58, #6ab04c); transition: width 1s ease-out; box-shadow: 0 0 10px rgba(106, 176, 76, 0.5); }
+.stages-labels { display: flex; justify-content: space-between; margin-top: 8px; opacity: 0.8; font-size: 0.85rem; }
+
+.sensor-row { display: flex; gap: 20px; justify-content: space-around; margin-top: 20px; }
+.sensor-box { background: rgba(0,0,0,0.2); padding: 20px; border-radius: 20px; display: flex; flex-direction: column; align-items: center; width: 45%; }
+.sensor-box strong { font-size: 2rem; margin-top: 5px; }
+
+.wind-dots-wrapper .dots-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
+.wind-dot { width: 12px; height: 12px; background: rgba(255,255,255,0.1); border-radius: 50%; }
+.wind-dot.active { background: #00d2d3; box-shadow: 0 0 10px #00d2d3; }
+
+.forecast-list { display: flex; gap: 15px; overflow-x: auto; padding-bottom: 10px; }
+.forecast-item { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 15px; text-align: center; min-width: 90px; }
+
+.team-group-card { display: flex; flex-direction: column; gap: 10px; background: rgba(255, 255, 255, 0.15); padding: 20px; border-radius: 20px; }
+.member-list li { padding: 12px 0; border-bottom: 1px dashed rgba(255,255,255,0.1); font-size: 1.1rem; }
+.is-king { color: #f1c40f; font-weight: bold; font-size: 1.2rem; display: flex; align-items: center; gap: 10px; text-shadow: 0 0 10px rgba(241, 196, 15, 0.5); }
+.crown-anim { font-size: 1.6rem; animation: floatCrown 2s ease-in-out infinite; }
+@keyframes floatCrown { 0%, 100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-5px) rotate(10deg); } }
+
+.member-link { color: inherit; text-decoration: none; transition: color 0.2s ease; display: inline-flex; align-items: center; gap: 5px; }
+.member-link:hover { color: #00d2d3; text-decoration: underline; text-underline-offset: 4px; }
+.linkedin-arrow { font-size: 0.8rem; opacity: 0.5; }
+.is-king .member-link { color: #f1c40f; }
+.is-king .member-link:hover { color: #fff; }
+
+/* =========================================
+   9. RESPONSIVE
+   ========================================= */
+@media (max-width: 1400px) {
+  .bac-img-container { width: 120px; height: 120px; min-width: 120px; }
+  .big-temp { font-size: 5rem; }
+}
+
+@media (max-width: 1100px) {
+  .app-container { display: block; padding-top: 30px; }
+  .grid-layout { grid-template-columns: 1fr; max-width: 600px; margin: 0 auto; }
+  .center-column { order: -1; }
+  .main-title { font-size: 2.5rem; }
+  .bac-card { padding: 20px; min-height: 120px; }
+  .bac-img-container { width: 100px; height: 100px; min-width: 100px; }
+}
+
+@media (max-width: 800px) {
+  .form-row-split { grid-template-columns: 1fr; }
+  .details-grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 480px) {
+  .bac-img-container { width: 80px; height: 80px; min-width: 80px; }
+  .bac-info-large h3 { font-size: 1.2rem; }
+}
